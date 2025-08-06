@@ -1,6 +1,6 @@
 import { IsEmail, IsEnum, IsString, IsStrongPassword } from 'class-validator';
-import { Role } from 'src/enum/user-role.enum';
-import { AccountStatus } from './../../users/schema/user.schema';
+import { AccountStatus } from 'src/common/enum/account-status';
+import { Role } from 'src/common/enum/user-role.enum';
 
 export class SignupDto {
   @IsString()

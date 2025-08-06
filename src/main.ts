@@ -1,5 +1,7 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import helmet from 'helmet';
+// import morgan from 'morgan';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/exceptions/exception';
 import { RolesGuard } from './common/guards/role.guard';
@@ -12,6 +14,7 @@ async function bootstrap() {
   app.enableCors({
     origin: '*',
   });
+  // app.use(morgan('combined'));
   app.setGlobalPrefix('/api/v1');
   app.useGlobalInterceptors(
     new ResponseInterceptor(),
@@ -19,6 +22,16 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalGuards(new RolesGuard(new Reflector()));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   await app.listen(process.env.PORT ?? 3000);
 }

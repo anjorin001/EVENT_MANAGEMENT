@@ -1,13 +1,16 @@
-import { Controller, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { Role } from 'src/enum/user-role.enum';
+import { Role } from 'src/common/enum/user-role.enum';
 import { AdminService } from './admin.service';
 
+@UseGuards(AuthGuard('jwt'))
 @Roles(Role.ADMIN)
 @Controller('admin')
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
+  @Get('pending-users')
   async getPendingUsers() {
     return await this.adminService.getPendingUsers();
   }

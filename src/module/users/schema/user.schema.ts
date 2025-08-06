@@ -1,14 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Role } from 'src/enum/user-role.enum';
+import { AccountStatus } from 'src/common/enum/account-status';
+import { Role } from 'src/common/enum/user-role.enum';
 
 export type UserDocument = User & Document;
-
-export enum AccountStatus {
-  APPROVED = 'APPROVED',
-  PENDING = 'PENDING',
-  REJECTED = 'REJECTED',
-}
 
 @Schema({ timestamps: true })
 export class User {

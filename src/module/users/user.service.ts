@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Role } from 'src/enum/user-role.enum';
+import { AccountStatus } from 'src/common/enum/account-status';
+import { Role } from 'src/common/enum/user-role.enum';
 import { SignupDto } from '../auth/dto/signup.dto';
-import { AccountStatus, User, UserDocument } from './schema/user.schema';
+import { User, UserDocument } from './schema/user.schema';
 
 @Injectable()
 export class UserService {

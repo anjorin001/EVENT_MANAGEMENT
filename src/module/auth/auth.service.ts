@@ -8,8 +8,8 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Role } from 'src/enum/user-role.enum';
-import { AccountStatus } from '../users/schema/user.schema';
+import { AccountStatus } from 'src/common/enum/account-status';
+import { Role } from 'src/common/enum/user-role.enum';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 
@@ -45,17 +45,17 @@ export class AuthService {
 
   async login(data: LoginDto) {
     const user = await this.userService.findByEmail(data.email);
-    if (!user) throw new UnauthorizedException('User not found'); 
+    if (!user) throw new UnauthorizedException('User not found');
 
     const isMatch = await bcrypt.compare(data.password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid password');
 
     if (user.accountStatus !== AccountStatus.APPROVED)
-      throw new ForbiddenException('account is not approved'); //TODO 
+      throw new ForbiddenException('account is not approved'); //TODO
 
     const payload = {
       userId: user._id,
-      userEmail: user.email,
+      email: user.email,
       role: user.role,
     };
 

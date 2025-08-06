@@ -2,7 +2,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { EventStatus } from 'src/enum/event.enum';
+import { EventStatus } from 'src/common/enum/event.enum';
 import { UserService } from '../users/user.service';
 import { EventFilterDto } from './dto/event-status.dto';
 import { EventDto } from './dto/event.dto';
