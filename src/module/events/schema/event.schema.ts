@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { EventStatus } from 'src/common/enum/event.enum';
 
-export type EventDocument = Event & Document;
+export type EventDocument = HydratedDocument<Event>;
 
 @Schema({ timestamps: true })
 export class Event {
@@ -11,9 +11,6 @@ export class Event {
 
   @Prop({ required: true })
   location: string;
-
-  @Prop({ type: Date, required: true })
-  date: Date;
 
   @Prop({ type: String, required: true })
   startTime: string;

@@ -1,17 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EventStatus } from 'src/common/enum/event.enum';
 import { UserService } from '../users/user.service';
 import { EventFilterDto } from './dto/event-status.dto';
 import { EventDto } from './dto/event.dto';
+import { Attendance, AttendanceDocument } from './schema/attendance.event';
 import { Event, EventDocument } from './schema/event.schema';
 
 @Injectable()
 export class EventService {
   constructor(
     @InjectModel(Event.name) private eventModel: Model<EventDocument>,
+    @InjectModel(Attendance.name)
+    private attendaceModel: Model<AttendanceDocument>,
     private userService: UserService,
   ) {}
 
@@ -20,6 +27,7 @@ export class EventService {
       eventStatus: EventStatus.PENDING,
       ...data,
     });
+
     return event;
   }
 
@@ -35,22 +43,33 @@ export class EventService {
   }
 
   async likeEvent(eventId: string, userId: string) {
-    const eventUpdate = await this.eventModel.findByIdAndUpdate(
-      eventId,
-      { $inc: { availableSeats: -1 } },
-      { new: true },
-    );
+    const isRegistered = await this.attendaceModel.findOne({ userId, eventId });
+    if (isRegistered) throw new ConflictException('you can only register once');
+    
+    const event = await this.eventModel.findById(eventId)
+    if(event?.availableSeats === 0) throw new ConflictException("seat availabilty is zero")
+
+    const eventUpdate = await this.eventModel
+      .findByIdAndUpdate(
+        eventId,
+        { $inc: { availableSeats: -1 } },
+        { new: true },
+      )
 
     if (!eventUpdate) throw new NotFoundException('event not found');
 
     const userUpdate = await this.userService.addEventToUser(eventId, userId);
+    await this.attendaceModel.create({
+      eventId,
+      userId,
+    });
 
     return { event: eventUpdate, user: userUpdate };
   }
 
   async approveEvent(id: string) {
-    const event = await this.eventModel.findByIdAndUpdate(
-      id,
+    const event = await this.eventModel.findOneAndUpdate(
+      { _id: id, eventStatus: EventStatus.PENDING },
       { eventStatus: EventStatus.APPROVED },
       { new: true },
     );
@@ -60,8 +79,8 @@ export class EventService {
   }
 
   async rejectEvent(id: string) {
-    const event = await this.eventModel.findByIdAndUpdate(
-      id,
+    const event = await this.eventModel.findOneAndUpdate(
+      { _id: id, eventStatus: EventStatus.PENDING },
       { eventStatus: EventStatus.REJECTED },
       { new: true },
     );

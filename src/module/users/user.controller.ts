@@ -1,15 +1,16 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/module/auth/jwt-auth.guard';
 import { UserService } from './user.service';
 
-@UseGuards(JwtAuthGuard)
 @Controller('user')
+@UseGuards(JwtAuthGuard)
 export class UserController {
-  constructor(private userService: UserService) {}
-
+  constructor(private userService: UserService) { }
+  
   @Get('profile')
-  getProfile(@CurrentUser() user) {
-    return user;
+  async getProfile(@CurrentUser() user) {
+    console.log(user)
+    return await this.userService.findById(user.id);
   }
 }

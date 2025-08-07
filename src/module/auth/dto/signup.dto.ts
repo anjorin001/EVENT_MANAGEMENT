@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, IsStrongPassword } from 'class-validator';
 import { AccountStatus } from 'src/common/enum/account-status';
 import { Role } from 'src/common/enum/user-role.enum';
 
@@ -16,6 +16,7 @@ export class SignupDto {
   @IsEnum(Role)
   role?: Role;
 
+  @IsOptional()
   @IsEnum(AccountStatus)
   accountStatus?: AccountStatus;
 }

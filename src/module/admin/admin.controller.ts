@@ -1,12 +1,13 @@
 import { Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/common/enum/user-role.enum';
+import { RolesGuard } from '../../common/guards/role.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminService } from './admin.service';
 
-@UseGuards(AuthGuard('jwt'))
-@Roles(Role.ADMIN)
 @Controller('admin')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
@@ -23,6 +24,11 @@ export class AdminController {
   @Patch('reject-user/:id')
   async rejectUser(@Param('id') id: string) {
     return await this.adminService.rejectUser(id);
+  }
+
+  @Get('/pending-events')
+  async getPendingEvents() {
+    return await this.adminService.getPendingEvents();
   }
 
   @Patch('approve-event/:id')

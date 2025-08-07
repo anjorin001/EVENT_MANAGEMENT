@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { EventStatus } from 'src/common/enum/event.enum';
 import { EventService } from '../events/event.service';
 import { UserService } from '../users/user.service';
 
@@ -12,7 +13,7 @@ export class AdminService {
   async getPendingUsers() {
     const users = await this.userService.getPendingUsers();
 
-    if (!users || users.length === 0) {
+    if (!users) {
       return {
         message: 'Zero users want the promoter role',
         data: null,
@@ -23,6 +24,12 @@ export class AdminService {
       message: 'Users who want promoter role retrieved successfully',
       data: users,
     };
+  }
+
+  async getPendingEvents() {
+    return await this.eventService.getEvent({
+      eventStatus: EventStatus.PENDING,
+    });
   }
 
   async approveUser(id: string) {

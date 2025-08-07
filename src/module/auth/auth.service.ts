@@ -24,6 +24,9 @@ export class AuthService {
     const user = await this.userService.findByEmail(data.email);
     if (user) throw new ConflictException('user already exist');
 
+    if (data.role === Role.ADMIN)
+      throw new ForbiddenException('users cannot signup as admin');
+
     const status =
       data.role === Role.PROMOTER
         ? AccountStatus.PENDING
@@ -54,7 +57,7 @@ export class AuthService {
       throw new ForbiddenException('account is not approved'); //TODO
 
     const payload = {
-      userId: user._id,
+      id: user._id,
       email: user.email,
       role: user.role,
     };

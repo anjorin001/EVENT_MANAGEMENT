@@ -1,13 +1,14 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { Role } from 'src/common/enum/user-role.enum';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/enum/user-role.enum';
+import { RolesGuard } from '../../common/guards/role.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { EventDto } from '../events/dto/event.dto';
 import { PromoterService } from './promoter.service';
 
-@UseGuards(AuthGuard('jwt'))
-@Roles(Role.PROMOTER)
 @Controller('promoter')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.PROMOTER)
 export class PromoterController {
   constructor(private promoterService: PromoterService) {}
 

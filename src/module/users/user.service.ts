@@ -27,10 +27,14 @@ export class UserService {
   }
 
   async findById(userId: string) {
+    console.log(userId);
     const user = await this.userModel
       .findById(userId)
       .select('-password')
+      .populate('likedEvents')
       .exec();
+
+    if (!user) throw new NotFoundException('user not found');
     return user;
   }
 
@@ -41,7 +45,9 @@ export class UserService {
         { $addToSet: { likedEvents: eventId } },
         { new: true },
       )
-      .select('-password');
+      .select('-password')
+      .populate('likedEvents')
+      .lean();
 
     if (!updatedUser) {
       throw new NotFoundException('User not found');
@@ -51,32 +57,46 @@ export class UserService {
   }
 
   async getPendingUsers() {
-    return await this.userModel.find({ accountStatus: AccountStatus.PENDING });
+    const users = await this.userModel
+      .find({ accountStatus: AccountStatus.PENDING })
+      .select('-createdAt -updatedAt -likedEvents')
+      .exec();
+
+    return users;
   }
 
   async approveUser(id: string) {
-    const user = await this.userModel.findOneAndUpdate(
-      {
-        id,
-        accountStatus: AccountStatus.PENDING,
-      },
-      { accountStatus: AccountStatus.APPROVED },
-      { new: true },
-    );
+    const user = await this.userModel
+      .findOneAndUpdate(
+        {
+          _id: id,
+          accountStatus: AccountStatus.PENDING,
+        },
+        {
+          accountStatus: AccountStatus.APPROVED,
+          role: Role.PROMOTER,
+        },
+        { new: true },
+      )
+      .select('-createdAt -updatedAt -likedEvents')
+      .exec();
     if (!user) throw new NotFoundException('user not found');
 
     return user;
   }
 
   async rejectUser(id: string) {
-    const user = await this.userModel.findOneAndUpdate(
-      {
-        id,
-        accountStatus: AccountStatus.PENDING,
-      },
-      { accountStatus: AccountStatus.REJECTED, role: Role.USER },
-      { new: true },
-    );
+    const user = await this.userModel
+      .findOneAndUpdate(
+        {
+          _id: id,
+          accountStatus: AccountStatus.PENDING,
+        },
+        { accountStatus: AccountStatus.APPROVED, role: Role.USER },
+        { new: true },
+      )
+      .select('-createdAt -updatedAt -likedEvents')
+      .exec();
     if (!user) throw new NotFoundException('user not found');
 
     return user;

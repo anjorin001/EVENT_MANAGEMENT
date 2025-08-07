@@ -1,27 +1,29 @@
 import { ValidationPipe } from '@nestjs/common';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
-// import morgan from 'morgan';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/exceptions/exception';
-import { RolesGuard } from './common/guards/role.guard';
+import { MongooseCleanInterceptor } from './common/interceptors/mongoDb-response-interceptor';
 import { ResponseInterceptor } from './common/interceptors/response-Interceptor';
 import { SanitizeResponseInterceptor } from './common/interceptors/sanitize-response';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+  });
   app.use(helmet());
   app.enableCors({
     origin: '*',
   });
-  // app.use(morgan('combined'));
+
   app.setGlobalPrefix('/api/v1');
   app.useGlobalInterceptors(
-    new ResponseInterceptor(),
+    new MongooseCleanInterceptor(),
     new SanitizeResponseInterceptor(),
+    new ResponseInterceptor(),
   );
   app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalGuards(new RolesGuard(new Reflector()));
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
