@@ -27,7 +27,7 @@ export class EventController {
     return await this.eventService.createEvent(body);
   }
 
-  @Get()
+  @Get('')
   async getEvent() {
     return await this.eventService.getEvent({
       eventStatus: EventStatus.APPROVED,
@@ -45,6 +45,7 @@ export class EventController {
   }
 
   @Patch('approve-event/:id')
+  @Roles(Role.ADMIN)
   async approveEvent(@Param('id') id: string) {
     const result = await this.eventService.approveEvent(id);
 
@@ -54,6 +55,7 @@ export class EventController {
   }
 
   @Patch('reject-event/:id')
+  @Roles(Role.ADMIN)
   async rejectEvent(@Param('id') id: string) {
     const result = await this.eventService.rejectEvent(id);
 

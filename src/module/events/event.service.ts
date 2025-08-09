@@ -45,18 +45,17 @@ export class EventService {
   async likeEvent(eventId: string, userId: string) {
     const isRegistered = await this.attendaceModel.findOne({ userId, eventId });
     if (isRegistered) throw new ConflictException('you can only register once');
+
+    const event = await this.eventModel.findById(eventId);
+    if (event?.availableSeats === 0)
+      throw new ConflictException('seat availabilty is zero');
+    if (!event) throw new NotFoundException('event not found');
     
-    const event = await this.eventModel.findById(eventId)
-    if(event?.availableSeats === 0) throw new ConflictException("seat availabilty is zero")
-
-    const eventUpdate = await this.eventModel
-      .findByIdAndUpdate(
-        eventId,
-        { $inc: { availableSeats: -1 } },
-        { new: true },
-      )
-
-    if (!eventUpdate) throw new NotFoundException('event not found');
+    const eventUpdate = await this.eventModel.findByIdAndUpdate(
+      eventId,
+      { $inc: { availableSeats: -1 } },
+      { new: true },
+    );
 
     const userUpdate = await this.userService.addEventToUser(eventId, userId);
     await this.attendaceModel.create({
